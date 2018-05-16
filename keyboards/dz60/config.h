@@ -4,12 +4,12 @@
 #include "config_common.h"
 
 /* USB Device descriptor parameter */
-#define VENDOR_ID       0xFEED
-#define PRODUCT_ID      0x2260
+#define VENDOR_ID       0xDEAD
+#define PRODUCT_ID      0xBEEF
 #define DEVICE_VER      0x0001
-#define MANUFACTURER    KBDFans
-#define PRODUCT         DZ60
-#define DESCRIPTION     DZ60 Keyboard
+#define MANUFACTURER    qmkbuilder
+#define PRODUCT         keyboard
+#define DESCRIPTION     Keyboard
 
 /* key matrix size */
 #define MATRIX_ROWS 5
@@ -25,13 +25,15 @@
 
 /* number of backlight levels */
 #define BACKLIGHT_PIN B6
+#ifdef BACKLIGHT_PIN
 #define BACKLIGHT_LEVELS 5
+#endif
 
 /* Set 0 if debouncing isn't needed */
-#define DEBOUNCING_DELAY 5
+#define DEBOUNCING_DELAY 1
 
 /* Mechanical locking support. Use KC_LCAP, KC_LNUM or KC_LSCR instead in keymap */
-#define LOCKING_SUPPORT_ENABLE
+// #define LOCKING_SUPPORT_ENABLE
 
 /* Locking resynchronize hack */
 #define LOCKING_RESYNC_ENABLE
@@ -45,10 +47,27 @@
 #define PREVENT_STUCK_MODIFIERS
 
 #define RGB_DI_PIN E2
+#ifdef RGB_DI_PIN
 #define RGBLIGHT_ANIMATIONS
-#define RGBLED_NUM 16
-#define RGBLIGHT_HUE_STEP 8
-#define RGBLIGHT_SAT_STEP 8
-#define RGBLIGHT_VAL_STEP 8
+#define RGBLED_NUM 20
+#define RGBLIGHT_HUE_STEP 6
+#define RGBLIGHT_SAT_STEP 48
+#define RGBLIGHT_VAL_STEP 48
+#endif
+
+// Permissive Hold - for better dual function keys
+#define PERMISSIVE_HOLD
+
+// How long before a tap becomes a hold
+#define TAPPING_TERM 175
+
+#define FORCE_NKRO
+
+#define MODS_CTRL_MASK  ( MOD_BIT( KC_LSHIFT ) | MOD_BIT( KC_RSHIFT ) )
+
+#define CAPS_BL_LEVEL 5
+#define LAYER_MIN 0
+#define LAYER_MAX 1
+
 
 #endif
