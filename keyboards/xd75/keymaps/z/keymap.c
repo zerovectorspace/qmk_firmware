@@ -230,6 +230,7 @@
     #include "dynamic_macro.h"
 
     uint16_t alt_timer;
+    bool alt_is_down = false;
 
     bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         if ( !process_record_dynamic_macro( keycode, record ) ) {
@@ -309,12 +310,13 @@
                 }
                 else
                 {
+                    SEND_STRING( SS_UP( X_LALT ) );
                     if ( timer_elapsed( alt_timer ) < TIMER_LENGTH )
                     {
-                        SEND_STRING( SS_UP( X_LALT ) );
                         SEND_STRING( SS_LGUI("`") );
                     }
                 }
+
                 return false;
             }
         }
