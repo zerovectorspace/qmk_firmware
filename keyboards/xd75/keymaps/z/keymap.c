@@ -94,7 +94,7 @@
         TENKEY,
         SYMBOL,
         CPSLCK,
-        M_AGRV, // MT( MOD_LALT, LGUI( KC_GRV ) )
+        SG_ALT, // MT( MOD_LALT, LGUI( KC_GRV ) )
         DYNAMIC_MACRO_RANGE // Must be last
     };
 
@@ -274,7 +274,7 @@
                     }
                     return false;
                 }
-                case M_AGRV:
+                case SG_ALT:
                 {
                     if ( record->event.pressed )
                     {
@@ -356,7 +356,7 @@
          { ALT     , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , KC_LBRC , MCR_REC , KC_RBRC , KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    , KC_MINS },
          { CPSLCK  , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_LPRN , MCR_PLY , KC_RPRN , KC_H    , KC_J    , KC_K    , KC_L    , KC_SCLN , KC_QUOT },
          { SHIFT   , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    , KC_LCBR , MCR_STP , KC_RCBR , KC_N    , KC_M    , KC_COMM , KC_DOT  , KC_SLSH , KC_LSFT },
-         { TENKEY  , SYMBOL  , KC_LALT , KC_LGUI , LT_BSPC , M_AGRV  , KC_F1   , ESCQUIT , ALTGRV  , LT_ENT  , LT_SPC  , KC_UNDS , KC_PIPE , KC_BSLS , NXTLYR  }},
+         { TENKEY  , SYMBOL  , KC_LALT , KC_LGUI , LT_BSPC , SG_ALT  , KC_F1   , ESCQUIT , ALTGRV  , LT_ENT  , LT_SPC  , KC_UNDS , KC_PIPE , KC_BSLS , NXTLYR  }},
      
       /* GAMING
           .-----------------------------------------------------------------------------------------------------------------------------------------------------.
@@ -366,9 +366,9 @@
           |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
           |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
           |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
-          | shift   |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
+          | lshift  |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
           |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
-          |         |         | KC_LGUI | GM_SPC  | GM_SPC  |         |         |         |         |         |         |         |         |         |         |
+          | lctl    | lctl    | lctl    | lalt    | GM_SPC  | lctl    |         |         |         |         |         |         |         |         |         |
           '-----------------------------------------------------------------------------------------------------------------------------------------------------' */
 
               #define GM_SPC LT( _BSP, KC_SPC )
