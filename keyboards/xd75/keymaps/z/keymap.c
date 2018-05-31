@@ -214,10 +214,13 @@
         TMPRV,
         TMNXT,
         TMMAX,
+        M_AGRV,
         DYNAMIC_MACRO_RANGE // Must be last
     };
 
     #include "dynamic_macro.h"
+
+    uint16_t alt_timer;
 
     bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         if ( !process_record_dynamic_macro( keycode, record ) ) {
@@ -288,6 +291,23 @@
                     return false;
                 }
             }
+            case M_AGRV:
+            {
+                if ( record->event.pressed )
+                {
+                    alt_timer = timer_read();
+                    SEND_STRING( SS_DOWN( X_LALT ) );
+                }
+                else
+                {
+                    if ( timer_elapsed( alt_timer ) < TIMER_LENGTH )
+                    {
+                        SEND_STRING( SS_UP( X_LALT ) );
+                        SEND_STRING( SS_LGUI("`") );
+                    }
+                }
+                return false;
+            }
         }
 
         return true;
@@ -356,7 +376,7 @@
          { ALT     , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , KC_LBRC , MCR_REC , KC_RBRC , KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    , KC_MINS },
          { CAPS    , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_LPRN , MCR_PLY , KC_RPRN , KC_H    , KC_J    , KC_K    , KC_L    , KC_SCLN , KC_QUOT },
          { SHIFT   , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    , KC_LCBR , MCR_STP , KC_RCBR , KC_N    , KC_M    , KC_COMM , KC_DOT  , KC_SLSH , KC_LSFT },
-         { L_NUM   , L_SYM   , KC_LALT , KC_LGUI , LT_BSPC , SUPGRV  , KC_F1   , ESCQUIT , ALTGRV  , LT_ENT  , LT_SPC  , KC_UNDS , KC_PIPE , KC_BSLS , L_NEXT  }},
+         { L_NUM   , L_SYM   , KC_LALT , KC_LGUI , LT_BSPC , M_AGRV  , KC_F1   , ESCQUIT , ALTGRV  , LT_ENT  , LT_SPC  , KC_UNDS , KC_PIPE , KC_BSLS , L_NEXT  }},
      
       /* GAMING
           .-----------------------------------------------------------------------------------------------------------------------------------------------------.
