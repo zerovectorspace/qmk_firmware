@@ -205,15 +205,24 @@
                              MACROS
 *********************************************************************/
     enum custom_keycodes {
+        // Location List
         LLPRV = SAFE_RANGE,
         LLNXT,
+
+        // Quickfix List
         QLPRV,
         QLNXT,
+
+        // Switch buffers
         BFPRV,
         BFNXT,
+
+        // Tmux windows
         TMPRV,
         TMNXT,
         TMMAX,
+
+        // MT( MOD_LALT, LGUI( KC_GRV ) )
         M_AGRV,
         DYNAMIC_MACRO_RANGE // Must be last
     };
