@@ -34,43 +34,46 @@
     // MODE 24,    christmas
     // MODE 25-34, static gradient
 
-    #define LAYER_MIN 0
-    #define LAYER_MAX 2
-    #define TEN_KEY_RGB_MODE 16
-    #define SYMBOLS_RGB_MODE 32
-    #define CAPS_RGB_MODE 5
-    #define TIMER_LENGTH 150
+    // Constants
+        #define LAYER_MIN 0
+        #define LAYER_MAX 2
+        #define TEN_KEY_RGB_MODE 16
+        #define SYMBOLS_RGB_MODE 32
+        #define CAPS_RGB_MODE 5
+        #define TIMER_LENGTH 150
 
-    int current_layer = 0;
-    int previous_layer = 0;
+    // Variables
+        int current_layer = 0;
+        int previous_layer = 0;
 
-    uint16_t caps_lock_timer;
-    bool caps_is_on = false;
+        uint16_t caps_lock_timer;
+        bool caps_is_on = false;
 
-    uint16_t num_timer;
-    bool num_is_on = false;
+        uint16_t num_timer;
+        bool num_is_on = false;
 
-    uint16_t alt_timer;
-    bool alt_is_down = false;
+        uint16_t alt_timer;
+        bool alt_is_down = false;
 
-    const uint16_t rgb_mode_map[] = {
-        [0]   = 1,
-        [1]   = 7,
-        [2]   = 2,
-        [3]   = 27,
-        [4]   = 29,
-        [5]   = 32,
-        [6]   = 33,
-        [7]   = 34,
-        [8]   = 1,
-        [9]   = 1,
-        [10]  = 1,
-        [11]  = 1,
-        [12]  = 1,
-        [13]  = 1,
-        [14]  = 1,
-        [15]  = 1
-    };
+        const uint16_t rgb_mode_map[] = {
+            [0]   = 1,
+            [1]   = 7,
+            [2]   = 2,
+            [3]   = 27,
+            [4]   = 29,
+            [5]   = 32,
+            [6]   = 33,
+            [7]   = 34,
+            [8]   = 1,
+            [9]   = 1,
+            [10]  = 1,
+            [11]  = 1,
+            [12]  = 1,
+            [13]  = 1,
+            [14]  = 1,
+            [15]  = 1
+        };
+
     enum custom_keycodes {
         // Location List
         LLPRV = SAFE_RANGE,
@@ -245,7 +248,10 @@
                         caps_lock_timer = timer_read();
                         SEND_STRING( SS_DOWN( X_LCTRL ) );
                     }
-                    else {
+                    else
+                    {
+                        SEND_STRING( SS_UP( X_LCTRL ) );
+
                         if ( timer_elapsed( caps_lock_timer ) < TIMER_LENGTH )
                         {
                             if ( caps_is_on ) {
@@ -264,13 +270,9 @@
 
                                 SEND_STRING( SS_TAP( X_CAPSLOCK ) );
 
-                                SEND_STRING( SS_UP( X_LCTRL ) );
                                 caps_is_on = true;
-                                return false;
                             }
                         }
-
-                        SEND_STRING( SS_UP( X_LCTRL ) );
                     }
                     return false;
                 }
@@ -284,6 +286,7 @@
                     else
                     {
                         SEND_STRING( SS_UP( X_LALT ) );
+
                         if ( timer_elapsed( alt_timer ) < TIMER_LENGTH )
                         {
                             SEND_STRING( SS_LGUI("`") );
