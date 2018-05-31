@@ -11,7 +11,20 @@
     #define _ENT 7
 
 /*********************************************************************
-                            FUNCTIONS
+                            TAP DANCE
+*********************************************************************/
+    enum {
+      _ESCQUIT = 0,
+      _GRVQUIT
+    };
+
+    qk_tap_dance_action_t tap_dance_actions[] = {
+      [_ESCQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_ESC, LCTL( LSFT( KC_Q ) ) ),
+      [_GRVQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_GRV, LCTL( LSFT( KC_Q ) ) )
+    };
+
+/*********************************************************************
+                             MACROS
 *********************************************************************/
     // MODE 2-5,   breathing
     // MODE 6-8,   rainbow mood
@@ -30,10 +43,15 @@
 
     int current_layer = 0;
     int previous_layer = 0;
+
     uint16_t caps_lock_timer;
     bool caps_is_on = false;
+
     uint16_t num_timer;
     bool num_is_on = false;
+
+    uint16_t alt_timer;
+    bool alt_is_down = false;
 
     const uint16_t rgb_mode_map[] = {
         [0]   = 1,
@@ -53,157 +71,6 @@
         [14]  = 1,
         [15]  = 1
     };
-
-    void led_set_user(uint8_t usb_led) {
-        /* if ( usb_led & ( 1 << USB_LED_CAPS_LOCK ) ) */
-            /* rgblight_mode( 18 ); */
-        /* else */
-            /* rgblight_mode( rgb_mode_map[ current_layer ] ); */
-    }
-
-    enum function_id {
-        NEXT_LAYER = 0,
-        TEN_KEY_FN,
-        SYMBOLS_FN,
-        CAPS_LOCK_FN,
-    };
-
-    const uint16_t PROGMEM fn_actions[] = {
-        [NEXT_LAYER]  = ACTION_FUNCTION( NEXT_LAYER ),
-        [TEN_KEY_FN]  = ACTION_FUNCTION( TEN_KEY_FN ),
-        [SYMBOLS_FN]  = ACTION_FUNCTION( SYMBOLS_FN ),
-        [CAPS_LOCK_FN]  = ACTION_FUNCTION( CAPS_LOCK_FN ),
-    };
-
-    void action_function( keyrecord_t *record, uint8_t id, uint8_t opt )
-    {
-        switch ( id )
-        {
-            case NEXT_LAYER:
-            {
-                if ( record->event.pressed )
-                {
-                    current_layer++;
-                    if ( current_layer > LAYER_MAX )
-                        current_layer = LAYER_MIN;
-
-                    layer_off( previous_layer );
-                    layer_on( current_layer );
-
-                    rgblight_mode( rgb_mode_map[ current_layer ] );
-                    previous_layer = current_layer;
-                }
-                break;
-            }
-            case TEN_KEY_FN:
-            {
-                if ( record->event.pressed )
-                {
-                    num_timer = timer_read();
-                    layer_on( _NUM );
-                    rgblight_mode( TEN_KEY_RGB_MODE );
-                }
-                else {
-                    if ( timer_elapsed( num_timer ) < TIMER_LENGTH )
-                    {
-                        if ( num_is_on ) {
-                            num_is_on = false;
-                        } else {
-                            num_is_on = true;
-                            break;
-                        }
-                    }
-
-                    if ( caps_is_on )
-                        rgblight_mode( CAPS_RGB_MODE );
-                    else
-                        rgblight_mode( rgb_mode_map[ current_layer ] );
-
-                    layer_off( _NUM );
-                }
-                break;
-            }
-            case SYMBOLS_FN:
-            {
-                if ( record->event.pressed )
-                {
-                    layer_on( _SYM );
-                    rgblight_mode( SYMBOLS_RGB_MODE );
-                }
-                else {
-                    layer_off( _SYM );
-
-                    if ( caps_is_on )
-                        rgblight_mode( CAPS_RGB_MODE );
-                    else
-                        rgblight_mode( rgb_mode_map[ current_layer ] );
-                }
-                break;
-            }
-            case CAPS_LOCK_FN:
-            {
-                if ( record->event.pressed )
-                {
-                    caps_lock_timer = timer_read();
-                    add_key( KC_LCTL );
-                    send_keyboard_report();
-                }
-                else {
-                    if ( timer_elapsed( caps_lock_timer ) < TIMER_LENGTH )
-                    {
-                        if ( caps_is_on ) {
-                            if ( num_is_on )
-                                rgblight_mode( TEN_KEY_RGB_MODE );
-                            else
-                                rgblight_mode( rgb_mode_map[ current_layer ] );
-                            backlight_level( 0 );
-
-                            add_key( KC_CAPS );
-                            send_keyboard_report();
-                            del_key( KC_CAPS );
-                            send_keyboard_report();
-
-                            caps_is_on = false;
-                        } else {
-                            rgblight_mode( CAPS_RGB_MODE );
-                            backlight_level( 255 );
-
-                            add_key( KC_CAPS );
-                            send_keyboard_report();
-                            del_key( KC_CAPS );
-                            send_keyboard_report();
-
-                            del_key( KC_LCTL );
-                            send_keyboard_report();
-                            caps_is_on = true;
-                            break;
-                        }
-                    }
-
-                    del_key( KC_LCTL );
-                    send_keyboard_report();
-                }
-                break;
-            }
-        }
-    }
-
-/*********************************************************************
-                            TAP DANCE
-*********************************************************************/
-    enum {
-      _ESCQUIT = 0,
-      _GRVQUIT
-    };
-
-    qk_tap_dance_action_t tap_dance_actions[] = {
-      [_ESCQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_ESC, LCTL( LSFT( KC_Q ) ) ),
-      [_GRVQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_GRV, LCTL( LSFT( KC_Q ) ) )
-    };
-
-/*********************************************************************
-                             MACROS
-*********************************************************************/
     enum custom_keycodes {
         // Location List
         LLPRV = SAFE_RANGE,
@@ -222,15 +89,16 @@
         TMNXT,
         TMMAX,
 
-        // MT( MOD_LALT, LGUI( KC_GRV ) )
-        M_AGRV,
+        // Custom Commands
+        NXTLYR,
+        TENKEY,
+        SYMBOL,
+        CPSLCK,
+        M_AGRV, // MT( MOD_LALT, LGUI( KC_GRV ) )
         DYNAMIC_MACRO_RANGE // Must be last
     };
 
     #include "dynamic_macro.h"
-
-    uint16_t alt_timer;
-    bool alt_is_down = false;
 
     bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         if ( !process_record_dynamic_macro( keycode, record ) ) {
@@ -238,87 +106,192 @@
         }
 
         switch( keycode ) {
-            case LLPRV:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING("[l");
-                    return false;
-                }
-            }
-            case LLNXT:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING("]l");
-                    return false;
-                }
-            }
-            case QLPRV:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING("[q");
-                    return false;
-                }
-            }
-            case QLNXT:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING("]q");
-                    return false;
-                }
-            }
-            case BFPRV:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING("[b");
-                    return false;
-                }
-            }
-            case BFNXT:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING("]b");
-                    return false;
-                }
-            }
-            case TMPRV:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING(SS_LCTRL("a")"p");
-                    return false;
-                }
-            }
-            case TMNXT:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING(SS_LCTRL("a")"n");
-                    return false;
-                }
-            }
-            case TMMAX:
-            {
-                if ( record->event.pressed ) {
-                    SEND_STRING(SS_LCTRL("a")"z");
-                    return false;
-                }
-            }
-            case M_AGRV:
-            {
-                if ( record->event.pressed )
+            // Vim Commands
+                case LLPRV:
                 {
-                    alt_timer = timer_read();
-                    SEND_STRING( SS_DOWN( X_LALT ) );
+                    if ( record->event.pressed ) {
+                        SEND_STRING("[l");
+                        return false;
+                    }
                 }
-                else
+                case LLNXT:
                 {
-                    SEND_STRING( SS_UP( X_LALT ) );
-                    if ( timer_elapsed( alt_timer ) < TIMER_LENGTH )
-                    {
-                        SEND_STRING( SS_LGUI("`") );
+                    if ( record->event.pressed ) {
+                        SEND_STRING("]l");
+                        return false;
+                    }
+                }
+                case QLPRV:
+                {
+                    if ( record->event.pressed ) {
+                        SEND_STRING("[q");
+                        return false;
+                    }
+                }
+                case QLNXT:
+                {
+                    if ( record->event.pressed ) {
+                        SEND_STRING("]q");
+                        return false;
+                    }
+                }
+                case BFPRV:
+                {
+                    if ( record->event.pressed ) {
+                        SEND_STRING("[b");
+                        return false;
+                    }
+                }
+                case BFNXT:
+                {
+                    if ( record->event.pressed ) {
+                        SEND_STRING("]b");
+                        return false;
                     }
                 }
 
-                return false;
-            }
+            // Tmux Commands
+                case TMPRV:
+                {
+                    if ( record->event.pressed ) {
+                        SEND_STRING(SS_LCTRL("a")"p");
+                        return false;
+                    }
+                }
+                case TMNXT:
+                {
+                    if ( record->event.pressed ) {
+                        SEND_STRING(SS_LCTRL("a")"n");
+                        return false;
+                    }
+                }
+                case TMMAX:
+                {
+                    if ( record->event.pressed ) {
+                        SEND_STRING(SS_LCTRL("a")"z");
+                        return false;
+                    }
+                }
+
+            // Custom Commands
+                case NXTLYR:
+                {
+                    if ( record->event.pressed )
+                    {
+                        current_layer++;
+                        if ( current_layer > LAYER_MAX )
+                            current_layer = LAYER_MIN;
+
+                        layer_off( previous_layer );
+                        layer_on( current_layer );
+
+                        rgblight_mode( rgb_mode_map[ current_layer ] );
+                        previous_layer = current_layer;
+
+                        return false;
+                    }
+                }
+                case TENKEY:
+                {
+                    if ( record->event.pressed )
+                    {
+                        num_timer = timer_read();
+                        layer_on( _NUM );
+                        rgblight_mode( TEN_KEY_RGB_MODE );
+                    }
+                    else
+                    {
+                        if ( timer_elapsed( num_timer ) < TIMER_LENGTH )
+                        {
+                            if ( num_is_on ) {
+                                num_is_on = false;
+                            } else {
+                                num_is_on = true;
+                                return false;
+                            }
+                        }
+
+                        if ( caps_is_on )
+                            rgblight_mode( CAPS_RGB_MODE );
+                        else
+                            rgblight_mode( rgb_mode_map[ current_layer ] );
+
+                        layer_off( _NUM );
+                    }
+                    return false;
+                }
+                case SYMBOL:
+                {
+                    if ( record->event.pressed )
+                    {
+                        layer_on( _SYM );
+                        rgblight_mode( SYMBOLS_RGB_MODE );
+                    }
+                    else
+                    {
+                        layer_off( _SYM );
+
+                        if ( caps_is_on )
+                            rgblight_mode( CAPS_RGB_MODE );
+                        else
+                            rgblight_mode( rgb_mode_map[ current_layer ] );
+                    }
+                    return false;
+                }
+                case CPSLCK:
+                {
+                    if ( record->event.pressed )
+                    {
+                        caps_lock_timer = timer_read();
+                        SEND_STRING( SS_DOWN( X_LCTRL ) );
+                    }
+                    else {
+                        if ( timer_elapsed( caps_lock_timer ) < TIMER_LENGTH )
+                        {
+                            if ( caps_is_on ) {
+                                if ( num_is_on )
+                                    rgblight_mode( TEN_KEY_RGB_MODE );
+                                else
+                                    rgblight_mode( rgb_mode_map[ current_layer ] );
+                                backlight_level( 0 );
+
+                                SEND_STRING( SS_TAP( X_CAPSLOCK ) );
+
+                                caps_is_on = false;
+                            } else {
+                                rgblight_mode( CAPS_RGB_MODE );
+                                backlight_level( 255 );
+
+                                SEND_STRING( SS_TAP( X_CAPSLOCK ) );
+
+                                SEND_STRING( SS_UP( X_LCTRL ) );
+                                caps_is_on = true;
+                                return false;
+                            }
+                        }
+
+                        SEND_STRING( SS_UP( X_LCTRL ) );
+                    }
+                    return false;
+                }
+                case M_AGRV:
+                {
+                    if ( record->event.pressed )
+                    {
+                        alt_timer = timer_read();
+                        SEND_STRING( SS_DOWN( X_LALT ) );
+                    }
+                    else
+                    {
+                        SEND_STRING( SS_UP( X_LALT ) );
+                        if ( timer_elapsed( alt_timer ) < TIMER_LENGTH )
+                        {
+                            SEND_STRING( SS_LGUI("`") );
+                        }
+                    }
+
+                    return false;
+                }
         }
 
         return true;
@@ -363,7 +336,6 @@
          '-----------------------------------------------------------------------------------------------------------------------------------------------------' */
 
              #define ALT MT( MOD_LALT, KC_TAB )
-             #define CAPS F( CAPS_LOCK_FN )
              #define SHIFT MT( MOD_LSFT, KC_ESC )
              #define CTLBS LCTL(KC_BSPC)
              #define ALTGRV LALT( KC_GRV )
@@ -374,9 +346,6 @@
              #define LT_BSPC LT( _BSP, KC_BSPC )
              #define LT_SPC LT( _SPC, KC_SPC )
              #define LT_ENT LT( _ENT, KC_ENT )
-             #define L_NUM F( TEN_KEY_FN )
-             #define L_SYM F( SYMBOLS_FN )
-             #define L_NEXT F( NEXT_LAYER )
            
              #define MCR_PLY DYN_MACRO_PLAY1
              #define MCR_REC DYN_REC_START1
@@ -385,9 +354,9 @@
          [_QW] = {
          { KC_GRV  , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , KC_BSPC , TERM    , KC_DEL  , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , KC_EQL  },
          { ALT     , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , KC_LBRC , MCR_REC , KC_RBRC , KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    , KC_MINS },
-         { CAPS    , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_LPRN , MCR_PLY , KC_RPRN , KC_H    , KC_J    , KC_K    , KC_L    , KC_SCLN , KC_QUOT },
+         { CPSLCK  , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_LPRN , MCR_PLY , KC_RPRN , KC_H    , KC_J    , KC_K    , KC_L    , KC_SCLN , KC_QUOT },
          { SHIFT   , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    , KC_LCBR , MCR_STP , KC_RCBR , KC_N    , KC_M    , KC_COMM , KC_DOT  , KC_SLSH , KC_LSFT },
-         { L_NUM   , L_SYM   , KC_LALT , KC_LGUI , LT_BSPC , M_AGRV  , KC_F1   , ESCQUIT , ALTGRV  , LT_ENT  , LT_SPC  , KC_UNDS , KC_PIPE , KC_BSLS , L_NEXT  }},
+         { TENKEY  , SYMBOL  , KC_LALT , KC_LGUI , LT_BSPC , M_AGRV  , KC_F1   , ESCQUIT , ALTGRV  , LT_ENT  , LT_SPC  , KC_UNDS , KC_PIPE , KC_BSLS , NXTLYR  }},
      
       /* GAMING
           .-----------------------------------------------------------------------------------------------------------------------------------------------------.
