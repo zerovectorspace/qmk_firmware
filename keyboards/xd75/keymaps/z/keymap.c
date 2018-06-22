@@ -37,8 +37,8 @@
     // Constants
         #define LAYER_MIN 0
         #define LAYER_MAX 2
-        #define TEN_KEY_RGB_MODE 16
-        #define SYMBOLS_RGB_MODE 32
+        #define TEN_KEY_RGB_MODE 17
+        #define SYMBOLS_RGB_MODE 23
         #define CAPS_RGB_MODE 5
         #define TIMER_LENGTH 150
 
@@ -57,13 +57,13 @@
 
         const uint16_t rgb_mode_map[] = {
             [0]   = 1,
-            [1]   = 7,
-            [2]   = 2,
-            [3]   = 27,
-            [4]   = 29,
-            [5]   = 32,
-            [6]   = 33,
-            [7]   = 34,
+            [1]   = 27,
+            [2]   = 28,
+            [3]   = 1,
+            [4]   = 1,
+            [5]   = 1,
+            [6]   = 1,
+            [7]   = 1,
             [8]   = 1,
             [9]   = 1,
             [10]  = 1,
