@@ -48,11 +48,11 @@ enum dynamic_macro_keycodes {
 /* Blink the LEDs to notify the user about some event. */
 void dynamic_macro_led_blink(void)
 {
-#ifdef BACKLIGHT_ENABLE
-    backlight_toggle();
-    wait_ms(100);
-    backlight_toggle();
-#endif
+// #ifdef BACKLIGHT_ENABLE
+//     backlight_toggle();
+//     wait_ms(100);
+//     backlight_toggle();
+// #endif
 }
 
 /* Convenience macros used for retrieving the debug info. All of them

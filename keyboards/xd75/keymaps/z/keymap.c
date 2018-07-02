@@ -11,19 +11,6 @@
     #define _ENT 7
 
 /*********************************************************************
-                            TAP DANCE
-*********************************************************************/
-    enum {
-      _ESCQUIT = 0,
-      _GRVQUIT
-    };
-
-    qk_tap_dance_action_t tap_dance_actions[] = {
-      [_ESCQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_ESC, LCTL( LSFT( KC_Q ) ) ),
-      [_GRVQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_GRV, LCTL( LSFT( KC_Q ) ) )
-    };
-
-/*********************************************************************
                              MACROS
 *********************************************************************/
     // MODE 2-5,   breathing
@@ -54,6 +41,8 @@
 
         uint16_t alt_timer;
         bool alt_is_down = false;
+
+        bool hasMacro = false;
 
         const uint16_t rgb_mode_map[] = {
             [0]   = 1,
@@ -102,6 +91,12 @@
     };
 
     #include "dynamic_macro.h"
+
+    void set_macro_led( void )
+    {
+      if ( hasMacro )
+          rgblight_setrgb_at( 255,0,0, 0 );
+    }
 
     bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         if ( !process_record_dynamic_macro( keycode, record ) ) {
@@ -189,6 +184,7 @@
                         layer_on( current_layer );
 
                         rgblight_mode( rgb_mode_map[ current_layer ] );
+                        set_macro_led();
                         previous_layer = current_layer;
 
                         return false;
@@ -219,6 +215,7 @@
                         else
                             rgblight_mode( rgb_mode_map[ current_layer ] );
 
+                        set_macro_led();
                         layer_off( _NUM );
                     }
                     return false;
@@ -238,6 +235,8 @@
                             rgblight_mode( CAPS_RGB_MODE );
                         else
                             rgblight_mode( rgb_mode_map[ current_layer ] );
+
+                        set_macro_led();
                     }
                     return false;
                 }
@@ -301,6 +300,52 @@
     };
 
 /*********************************************************************
+                            TAP DANCE
+*********************************************************************/
+    enum {
+      _ESCQUIT = 0,
+      _GRVQUIT,
+      _MCROTOG
+    };
+
+    void macro_tog_key( qk_tap_dance_state_t *state, void *user_data ) {
+      if ( state->count > 3 )
+          return;
+
+      uint16_t action = DYN_REC_STOP;
+      keyrecord_t kr;
+      kr.event.pressed = false;
+
+      backlight_level( 0 );
+      rgblight_mode( rgb_mode_map[ current_layer ] );
+      if ( state->count == 1 )
+      {
+          action = DYN_MACRO_PLAY1;
+      }
+      else if ( state->count == 2 )
+      {
+          action = DYN_REC_STOP;
+          kr.event.pressed = true;
+      }
+      else if ( state->count == 3 )
+      {
+          backlight_level( 255 );
+          rgblight_setrgb( 255,0,0 );
+          hasMacro = true;
+          action = DYN_REC_START1;
+      }
+      set_macro_led();
+
+      process_record_dynamic_macro( action, &kr );
+    }
+
+    qk_tap_dance_action_t tap_dance_actions[] = {
+      [_ESCQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_ESC, LCTL( LSFT( KC_Q ) ) ),
+      [_GRVQUIT]  = ACTION_TAP_DANCE_DOUBLE( KC_GRV, LCTL( LSFT( KC_Q ) ) ),
+      [_MCROTOG]  = ACTION_TAP_DANCE_FN( macro_tog_key )
+    };
+
+/*********************************************************************
                             KEY MAPS
 *********************************************************************/
       /* BLANK
@@ -331,9 +376,9 @@
          |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
          | tab_alt | q       | w       | e       | r       | t       | [       | mcrorec | ]       | y       | u       | i       | o       | p       | minus   |
          |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
-         | cap_ctl | a       | s       | d       | f       | g       | (       | mcroply | )       | h       | j       | k       | l       | ;       | '       |
+         | cap_ctl | a       | s       | d       | f       | g       | (       |         | )       | h       | j       | k       | l       | ;       | '       |
          |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
-         | lshift  | z       | x       | c       | v       | b       | {       | mcrostp | }       | n       | m       | ,       | .       | /       | lshift  |
+         | lshift  | z       | x       | c       | v       | b       | {       |         | }       | n       | m       | ,       | .       | /       | lshift  |
          |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
          | L_NUM   | L_SYM   | alt     | super   | l_bsp   | ctl_bs  | f1      | escquit | alttab  | enter   | space   | _       | |       | \       | L_NEXT  |
          '-----------------------------------------------------------------------------------------------------------------------------------------------------' */
@@ -350,15 +395,13 @@
              #define LT_SPC LT( _SPC, KC_SPC )
              #define LT_ENT LT( _ENT, KC_ENT )
            
-             #define MCR_REC DYN_REC_START1
-             #define MCR_PLY DYN_MACRO_PLAY1
-             #define MCR_STP DYN_REC_STOP
+             #define MCR_TOG TD( _MCROTOG )
 
          [_QW] = {
          { KC_GRV  , KC_1    , KC_2    , KC_3    , KC_4    , KC_5    , KC_BSPC , TERM    , KC_DEL  , KC_6    , KC_7    , KC_8    , KC_9    , KC_0    , KC_EQL  },
-         { ALT     , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , KC_LBRC , MCR_REC , KC_RBRC , KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    , KC_MINS },
-         { CPSLCK  , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_LPRN , MCR_PLY , KC_RPRN , KC_H    , KC_J    , KC_K    , KC_L    , KC_SCLN , KC_QUOT },
-         { SHIFT   , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    , KC_LCBR , MCR_STP , KC_RCBR , KC_N    , KC_M    , KC_COMM , KC_DOT  , KC_SLSH , KC_LSFT },
+         { ALT     , KC_Q    , KC_W    , KC_E    , KC_R    , KC_T    , KC_LBRC , MCR_TOG , KC_RBRC , KC_Y    , KC_U    , KC_I    , KC_O    , KC_P    , KC_MINS },
+         { CPSLCK  , KC_A    , KC_S    , KC_D    , KC_F    , KC_G    , KC_LPRN , _______ , KC_RPRN , KC_H    , KC_J    , KC_K    , KC_L    , KC_SCLN , KC_QUOT },
+         { SHIFT   , KC_Z    , KC_X    , KC_C    , KC_V    , KC_B    , KC_LCBR , _______ , KC_RCBR , KC_N    , KC_M    , KC_COMM , KC_DOT  , KC_SLSH , KC_LSFT },
          { TENKEY  , SYMBOL  , KC_LALT , KC_LGUI , LT_BSPC , SG_ALT  , KC_F1   , ESCQUIT , ALTGRV  , LT_ENT  , LT_SPC  , KC_UNDS , KC_PIPE , KC_BSLS , NXTLYR  }},
      
       /* GAMING
