@@ -350,8 +350,8 @@
              #define LT_SPC LT( _SPC, KC_SPC )
              #define LT_ENT LT( _ENT, KC_ENT )
            
-             #define MCR_PLY DYN_MACRO_PLAY1
              #define MCR_REC DYN_REC_START1
+             #define MCR_PLY DYN_MACRO_PLAY1
              #define MCR_STP DYN_REC_STOP
 
          [_QW] = {
