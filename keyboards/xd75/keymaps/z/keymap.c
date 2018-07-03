@@ -28,6 +28,7 @@
         #define SYMBOLS_RGB_MODE 23
         #define CAPS_RGB_MODE 5
         #define TIMER_LENGTH 150
+        #define MACRO_LED_RGB 255, 0, 255
 
     // Variables
         int current_layer = 0;
@@ -95,7 +96,7 @@
     void set_macro_led( void )
     {
       if ( hasMacro )
-          rgblight_setrgb_at( 255,0,0, 0 );
+          rgblight_setrgb_at( MACRO_LED_RGB, 0 );
     }
 
     bool process_record_user(uint16_t keycode, keyrecord_t *record) {
