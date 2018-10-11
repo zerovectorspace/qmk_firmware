@@ -4,11 +4,12 @@
     #define _QW  0
     #define _GM  1
     #define _DV  2
-    #define _NUM 3
-    #define _SYM 4
-    #define _BSP 5
-    #define _SPC 6
-    #define _ENT 7
+    #define _OFF 3
+    #define _NUM 4
+    #define _SYM 5
+    #define _BSP 6
+    #define _SPC 7
+    #define _ENT 8
 
 /*********************************************************************
                              MACROS
@@ -23,7 +24,7 @@
 
     // Constants
         #define LAYER_MIN 0
-        #define LAYER_MAX 2
+        #define LAYER_MAX 3
         #define TEN_KEY_RGB_MODE 17
         #define SYMBOLS_RGB_MODE 23
         #define CAPS_RGB_MODE 5
@@ -184,7 +185,14 @@
                         layer_off( previous_layer );
                         layer_on( current_layer );
 
-                        rgblight_mode( rgb_mode_map[ current_layer ] );
+                        if ( current_layer == _OFF )
+                          rgblight_disable();
+                        else
+                        {
+                          rgblight_enable();
+                          rgblight_mode( rgb_mode_map[ current_layer ] );
+                        }
+
                         set_macro_led();
                         previous_layer = current_layer;
 
@@ -447,6 +455,26 @@
          { _______ , KC_A    , KC_O    , KC_E    , KC_U    , KC_I    , _______ , _______ , _______ , KC_D    , KC_H    , KC_T    , KC_N    , KC_S    , KC_SLSH },
          { _______ , KC_SCLN , KC_Q    , KC_J    , KC_K    , KC_X    , _______ , _______ , _______ , KC_B    , KC_M    , KC_W    , KC_V    , KC_Z    , _______ },
          { _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ , _______ }},
+
+      /* OFF
+         .-----------------------------------------------------------------------------------------------------------------------------------------------------.
+         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
+         |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
+         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
+         |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
+         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
+         |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
+         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
+         |---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+---------|
+         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |         |
+         '-----------------------------------------------------------------------------------------------------------------------------------------------------' */
+
+         [_OFF] = {
+         { XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX },
+         { XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX },
+         { XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX },
+         { XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX },
+         { XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , XXXXXXX , _______ }},
 
       /* 10-KEY
          .-----------------------------------------------------------------------------------------------------------------------------------------------------.
